@@ -1,0 +1,94 @@
+code written in pycharm
+
+mport joblib
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score, roc_curve, auc
+from imblearn.over_sampling import SMOTE
+
+# 1. Load dataset
+df = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
+
+# 2. Clean TotalCharges
+df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+df['TotalCharges'] = df['TotalCharges'].fillna(0)
+
+# 3. Drop ID column
+df = df.drop('customerID', axis=1)
+
+# Replace 'No internet service' and 'No phone service' with 'No'
+replace_cols = [
+    'MultipleLines', 'OnlineSecurity', 'OnlineBackup',
+    'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies'
+]
+
+for col in replace_cols:
+    if col in df.columns:
+        df[col] = df[col].replace({'No internet service': 'No', 'No phone service': 'No'})
+
+# 4. Encode categorical variables
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+le = LabelEncoder()
+
+# Binary columns
+binary_cols = ['Partner','Dependents','PhoneService','PaperlessBilling','gender'] + replace_cols
+for col in binary_cols:
+    df[col] = le.fit_transform(df[col])
+
+# Multi-class columns
+multi_cols = ['Contract','PaymentMethod','InternetService']
+ohe = OneHotEncoder(drop='first', sparse_output=False)
+ohe_df = pd.DataFrame(ohe.fit_transform(df[multi_cols]),
+                      columns=ohe.get_feature_names_out(multi_cols),
+                      index=df.index)
+
+df = pd.concat([df.drop(multi_cols, axis=1), ohe_df], axis=1)
+
+
+# 5. Scale numeric features
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+df[['tenure','MonthlyCharges','TotalCharges']] = scaler.fit_transform(df[['tenure','MonthlyCharges','TotalCharges']])
+
+# 6. Train-test split
+from sklearn.model_selection import train_test_split
+X = df.drop('Churn', axis=1)
+y = df['Churn']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+
+# 7. Train models
+from sklearn.linear_model import LogisticRegression
+logreg = LogisticRegression(max_iter=1000)
+logreg.fit(X_train, y_train)
+
+
+from sklearn.ensemble import RandomForestClassifier
+
+# Train Random Forest
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+
+y_pred = rf.predict(X_test)
+print(classification_report(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
+
+
+
+feat_imp = pd.Series(rf.feature_importances_, index=X.columns).sort_values(ascending=False)
+sns.barplot(x=feat_imp.head(20), y=feat_imp.head(20).index)
+plt.title("Top 20 Features Driving Churn")
+plt.show()
+
+
+joblib.dump(rf, "telco_churn_model.pkl")
+
+print(df)
+
+
