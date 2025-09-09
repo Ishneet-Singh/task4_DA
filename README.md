@@ -6,7 +6,7 @@ The goal of this project is to predict customer churn (whether a customer will l
 -Take proactive measures such as offering discounts or personalized services.
 -Reduce churn rate and improve customer retention.
 
-📂 Dataset
+📂 Dataset (https://www.kaggle.com/datasets/blastchar/telco-customer-churn/data)
 The dataset used is Telco Customer Churn from IBM Sample Data.
 Rows: ~7,000 customers
 Features: Customer demographics, account information, services subscribed, billing details, etc.
@@ -49,5 +49,12 @@ Final trained model saved using joblib for later deployment.
 📊 Results
 Logistic Regression → interpretable baseline model.
 Random Forest → higher accuracy and better handling of complex relationships.
+
+📌 Next Steps / Future Work
+Hyperparameter tuning (GridSearchCV / RandomizedSearchCV).
+Try advanced models: XGBoost, LightGBM, CatBoost.
+Build a pipeline with sklearn.Pipeline.
+Deploy as a Flask/Django API or Streamlit dashboard.
+Implement real-time prediction for new customers.
 ROC-AUC score indicates good separation between churned vs. non-churned customers.
 Feature importance shows that tenure, contract type, monthly charges, and internet service are key churn drivers.
