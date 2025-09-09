@@ -91,4 +91,5 @@ joblib.dump(rf, "telco_churn_model.pkl")
 
 print(df)
 
-
+Results LInk - https://drive.google.com/file/d/1Iqn5WFUdd1q32uLGndIglC8Crptx8hHo/view?usp=share_link
+             - https://drive.google.com/file/d/10Sqx6GP7zdRdlB4-XHUN2ovUlPuiC3GA/view?usp=share_link
